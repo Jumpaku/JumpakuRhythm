@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+gen-data/include/*
+gen-data/build/*
+gen-data/asset/*
