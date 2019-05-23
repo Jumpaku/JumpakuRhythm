@@ -34,3 +34,7 @@
 gen-data/include/*
 gen-data/build/*
 gen-data/asset/*
+
+*.DS_Store
+
+\.vscode/
