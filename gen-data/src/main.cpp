@@ -35,7 +35,7 @@ int main(int argc, char** argv )
     auto ss = stringstream();
     ss << argv[2] << "_" << right << setfill('0') << setw(to_string(frames).size() + 1) << ".mov";
     auto writer = VideoWriter(ss.str(), VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(rect.width/8, rect.height), false);
-    
+
     while (capture.isOpened())
     {
         auto index = static_cast<int>(capture.get(CAP_PROP_POS_FRAMES));
@@ -45,13 +45,20 @@ int main(int argc, char** argv )
         capture >> frame;
         if (frame.empty()) break;
 
+
+        if (index <= 95) continue;
+        if (119 <= index) break;
+
         auto extracted = extractNotes(complessFrame(frame, rect));
         auto notesPos = detectNotes(extracted);
         for(auto const &p : notesPos) {
             extracted.at<uchar>((int)p.y, (int)p.x) = 0;
-            cout << msec << "," << p.x << "," << p.y << "\n";
+            cout << msec  - (1937.66*0.8 + 1954.36*0.2)<< "," << p.y << "\n";
         }
-        writer.write(extracted);
+        auto ss = stringstream();
+        ss << "asset/frame_" << index << ".jpg";
+        //imwrite(ss.str(), complessFrame(frame, rect));
+        //writer.write(extracted);
     }
     
     capture.release();

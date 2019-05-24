@@ -38,3 +38,5 @@ gen-data/asset/*
 *.DS_Store
 
 \.vscode/
+
+gen-data/output\.txt
