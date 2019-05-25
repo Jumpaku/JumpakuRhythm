@@ -4,14 +4,14 @@
 using namespace cv;
 using namespace std;
 
-cv::Mat complessFrame(cv::Mat const &frame, Rect const &rect)
+cv::Mat complessFrame(cv::Mat const &frame, Rect const &rect, Size const &size)
 {
     Mat rotated;
     flip(frame, rotated, 1);
     transpose(rotated, rotated);
     Mat cropped = rotated(rect);
     Mat resized;
-    resize(cropped, resized, Size(rect.width/8, rect.height));
+    resize(cropped, resized, size);
     return resized;
 }
 
