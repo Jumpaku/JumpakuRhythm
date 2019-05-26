@@ -15,7 +15,7 @@ services:
     volumes: 
       - './:/home/gen-data/'
     working_dir: '/home/gen-data/'
-    command: ['make', '-C', './build']
+    command: ['make', '-C', './tools/build/']
     
   run:
     container_name: 'gen-data-run'

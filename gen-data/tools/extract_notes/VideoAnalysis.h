@@ -10,6 +10,6 @@ struct NoteData {
     double y;
 };
 
-std::vector<NoteData> drstVideo(std::string const &inputFile, std::string const &outputDir);
+std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string const &outputDir);
 
 void drstCurve(int degree, std::vector<double> const &cp, std::vector<double> &us);

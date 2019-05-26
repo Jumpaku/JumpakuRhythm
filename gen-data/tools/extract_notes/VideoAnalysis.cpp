@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-std::vector<NoteData> drstVideo(std::string const &inputFile, std::string const &outputDir)
+std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string const &outputDir)
 {
     auto capture = VideoCapture(inputFile);
     auto fps = capture.get(CAP_PROP_FPS);
@@ -29,7 +29,7 @@ std::vector<NoteData> drstVideo(std::string const &inputFile, std::string const 
 
         Mat frame;
         capture >> frame;
-        if (frame.empty() || index >= 500) break;
+        if (frame.empty()) break;
 
         auto extracted = extractNotes(complessFrame(frame, rect, size));
         auto notesPos = detectNotes(extracted);
@@ -39,7 +39,7 @@ std::vector<NoteData> drstVideo(std::string const &inputFile, std::string const 
         }
         auto ss = stringstream();
         ss << outputDir << "/frame_" << right << setfill('0') << setw(to_string(frames).size() + 1) << index << ".jpg";
-        imwrite(ss.str(), complessFrame(frame, rect, size));
+        //imwrite(ss.str(), complessFrame(frame, rect, size));
         writer.write(extracted);
     }
     

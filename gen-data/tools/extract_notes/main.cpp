@@ -7,6 +7,7 @@
 #include "ExtractNotes.h"
 #include "VideoAnalysis.h"
 #include "BSplineCurve.hpp"
+#include <opencv2/core/utils/logger.hpp>
 
 using namespace cv;
 using namespace std;
@@ -17,13 +18,15 @@ using namespace std;
  */
 int main(int argc, char** argv)
 {
+    utils::logging::setLogLevel(utils::logging::LOG_LEVEL_SILENT);
+
     if ( argc != 3 ) {
         cout << "usage : gen-data-init 'input file' 'output file'\n";
         return -1;
     }
-    auto notes = drstVideo(argv[1], argv[2]);
+    auto notes = drstNotesVideo(argv[1], argv[2]);
     auto s = BSplineCurve::load(ifstream("data/NoteCurve.txt"));
-    auto out = ofstream(string(argv[2]) + "/data.tsv");
+    auto out = ofstream("data/note-data.tsv");
     for_each(notes.begin(), notes.end(), [&out, s](auto n) {
         if (35 < n.y && n.y < 685) {
             out << n.timeMsec - s(n.y)<< " " << n.x << " " << n.y << "\n";

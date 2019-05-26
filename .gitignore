@@ -40,3 +40,7 @@ gen-data/asset/*
 \.vscode/
 
 gen-data/output\.txt
+
+gen-data/tools/bin/
+gen-data/tools/build/
+gen-data/tools/include/
