@@ -4,7 +4,7 @@
 using namespace cv;
 using namespace std;
 
-cv::Mat preproccess(cv::Mat const &frame, PreproccessArgs const &args)
+cv::Mat preprocess(cv::Mat const &frame, PreprocessArgs const &args)
 {
     Mat rotated;
     flip(frame, rotated, 1);

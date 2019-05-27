@@ -57,16 +57,20 @@ std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string c
     forVideoCaptureFrames(
         move(capture),
         [&l, &writer, outputDir, vcInfo, crop, resize](auto index, auto msec, auto frame){
-            auto preproccessed = preproccess(frame, { crop, resize });
+            auto preproccessed = preprocess(frame, { crop, resize });
             auto filtered = filterHsv(preproccessed, { Scalar(170, 255*0.35, 255*0.8), Scalar(180, 255*0.65, 255) });
-            auto notes = extractNotes(filtered);
-            for(auto const &p : notes) {
+            auto points = extractNotes(filtered);
+            transform(points.begin(), points.end(), back_inserter(l), [msec](auto const &p){
+                return NoteData { msec, p.x, p.y };
+            });
+            for_each(points.begin(), points.end(), [&filtered](auto const &p){
                 filtered.template at<uchar>(p) = 0;
-                l.push_back({ msec, p.x, p.y });
-            }
+            });
+            /*
             auto ss = stringstream();
             ss << outputDir << "/frame_" << right << setfill('0') << setw(to_string(vcInfo.frames).size() + 1) << index << ".jpg";
-            //imwrite(ss.str(), complessFrame(frame, rect, size));
+            imwrite(ss.str(), complessFrame(frame, rect, size));
+            */
             writer.write(filtered);
     });
 
