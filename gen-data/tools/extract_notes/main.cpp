@@ -5,7 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include "ExtractNotes.h"
-#include "VideoAnalysis.h"
+#include "DetectNotes.h"
 #include "BSplineCurve.hpp"
 #include <opencv2/core/utils/logger.hpp>
 

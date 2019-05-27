@@ -1,4 +1,4 @@
-#include "VideoAnalysis.h"
+#include "DetectNotes.h"
 #include "ExtractNotes.h"
 
 #include <vector>
@@ -29,7 +29,7 @@ VideoInfo getVideoInfo(VideoCapture const &capture)
 
 void forVideoCaptureFrames(
     VideoCapture &&capture,
-    function<void(int const index, double const msec, Mat const &frame)> const action
+    function<void(int const index, double const msec, Mat const &frame)> const &action
 )
 {
     while(capture.isOpened()) {
