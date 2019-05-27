@@ -1,4 +1,7 @@
 #!/bin/sh
 
+# Build
 make -C ./tools/build/
-./scripts/gen-data-run.sh
+
+# Run the following command
+./tools/bin/extract_notes "./asset/2019-05-23_0753.mp4" "./asset/frames_2019-05-23_0753"

@@ -4,23 +4,23 @@
 using namespace cv;
 using namespace std;
 
-cv::Mat complessFrame(cv::Mat const &frame, Rect const &rect, Size const &size)
+cv::Mat preproccess(cv::Mat const &frame, PreproccessArgs const &args)
 {
     Mat rotated;
     flip(frame, rotated, 1);
     transpose(rotated, rotated);
-    Mat cropped = rotated(rect);
+    Mat cropped = rotated(args.cropRect);
     Mat resized;
-    resize(cropped, resized, size);
+    resize(cropped, resized, args.resizedSize);
     return resized;
 }
 
-cv::Mat extractNotes(cv::Mat const &frame)
+cv::Mat filterHsv(cv::Mat const &frame, FilterArgs const &args)
 {
     Mat hsv;
     cvtColor(frame, hsv, COLOR_BGR2HSV);
-    auto l = Scalar(170, 255*0.35, 255*0.8);
-    auto h = Scalar(180, 255*0.65, 255);
+    auto l = args.hsvLow;//Scalar(170, 255*0.35, 255*0.8);
+    auto h = args.hsvHigh;//Scalar(180, 255*0.65, 255);
     Mat filtered;
     inRange(hsv, l, h, filtered);
     Mat denoised = filtered;
@@ -30,7 +30,7 @@ cv::Mat extractNotes(cv::Mat const &frame)
     return denoised;
 }
 
-std::list<cv::Point2d> detectNotes(cv::Mat const &frame)
+std::list<cv::Point2d> extractNotes(cv::Mat const &frame)
 {
     vector<vector<Point>> contours;
     findContours(frame, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);

@@ -9,22 +9,6 @@ services:
     working_dir: '/home/gen-data/'
     command: ['./scripts/gen-data-init.sh']
 
-  build:
-    container_name: 'gen-data-build'
-    build: './'
-    volumes: 
-      - './:/home/gen-data/'
-    working_dir: '/home/gen-data/'
-    command: ['make', '-C', './tools/build/']
-    
-  run:
-    container_name: 'gen-data-run'
-    build: './'
-    volumes: 
-      - './:/home/gen-data/'
-    working_dir: '/home/gen-data/'
-    command: ['./scripts/gen-data-run.sh']
-
   build-run:
     container_name: 'gen-data-build-run'
     build: './'

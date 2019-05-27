@@ -10,6 +10,11 @@ struct NoteData {
     double y;
 };
 
+void forVideoCaptureFrames(
+    cv::VideoCapture &&capture,
+    std::function<void(double const msec, cv::Mat const &frame)> const action
+);
+
 std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string const &outputDir);
 
 void drstCurve(int degree, std::vector<double> const &cp, std::vector<double> &us);
