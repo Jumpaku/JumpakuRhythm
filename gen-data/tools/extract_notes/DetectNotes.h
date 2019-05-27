@@ -15,4 +15,4 @@ void forVideoCaptureFrames(
     std::function<void(double const msec, cv::Mat const &frame)> const &action
 );
 
-std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string const &outputDir);
+std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::string const &outputDir);

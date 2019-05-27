@@ -44,21 +44,28 @@ void forVideoCaptureFrames(
     capture.release();
 }
 
-std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string const &outputDir)
+std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::string const &outputDir)
 {
     auto capture = VideoCapture(inputFile);
     auto vcInfo = getVideoInfo(capture);
 
     auto crop = Rect(350, 140, vcInfo.height-700, vcInfo.width-140);
-    auto resize = Size(crop.width/8, crop.height);
-    auto writer = VideoWriter(outputDir + "/out.mov", VideoWriter::fourcc('m', 'p', '4', 'v'), vcInfo.fps, resize, false);
+    auto preprocessArgs = PreprocessArgs {
+        Rect(350, 140, vcInfo.height-700, vcInfo.width-140),
+        Size(crop.width/8, crop.height)
+    };
+    auto filterArgs = FilterArgs {
+        Scalar(170, 255*0.35, 255*0.8),
+        Scalar(180, 255*0.65, 255)
+    };
+    auto writer = VideoWriter(outputDir + "/out.mov", VideoWriter::fourcc('m', 'p', '4', 'v'), vcInfo.fps, preprocessArgs.resizedSize, false);
 
     auto l = list<NoteData>();
     forVideoCaptureFrames(
         move(capture),
-        [&l, &writer, outputDir, vcInfo, crop, resize](auto index, auto msec, auto frame){
-            auto preproccessed = preprocess(frame, { crop, resize });
-            auto filtered = filterHsv(preproccessed, { Scalar(170, 255*0.35, 255*0.8), Scalar(180, 255*0.65, 255) });
+        [&l, &writer, preprocessArgs, filterArgs, outputDir, vcInfo](auto index, auto msec, auto frame){
+            auto preproccessed = preprocess(frame, preprocessArgs);
+            auto filtered = filterHsv(preproccessed, filterArgs);
             auto points = extractNotes(filtered);
             transform(points.begin(), points.end(), back_inserter(l), [msec](auto const &p){
                 return NoteData { msec, p.x, p.y };
@@ -69,7 +76,7 @@ std::vector<NoteData> drstNotesVideo(std::string const &inputFile, std::string c
             /*
             auto ss = stringstream();
             ss << outputDir << "/frame_" << right << setfill('0') << setw(to_string(vcInfo.frames).size() + 1) << index << ".jpg";
-            imwrite(ss.str(), complessFrame(frame, rect, size));
+            imwrite(ss.str(), preproccessed);
             */
             writer.write(filtered);
     });
