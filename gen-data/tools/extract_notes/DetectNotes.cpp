@@ -5,6 +5,8 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 using namespace cv;
@@ -44,7 +46,7 @@ void forVideoCaptureFrames(
     capture.release();
 }
 
-std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::string const &outputDir)
+std::vector<NoteCandidate> extractNotesInFrame(std::string const &inputFile, std::string const &outputDir)
 {
     auto capture = VideoCapture(inputFile);
     auto vcInfo = getVideoInfo(capture);
@@ -60,7 +62,7 @@ std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::st
     };
     auto writer = VideoWriter(outputDir + "/out.mov", VideoWriter::fourcc('m', 'p', '4', 'v'), vcInfo.fps, preprocessArgs.resizedSize, false);
 
-    auto l = list<NoteData>();
+    auto l = list<NoteCandidate>();
     forVideoCaptureFrames(
         move(capture),
         [&l, &writer, preprocessArgs, filterArgs, outputDir, vcInfo](auto index, auto msec, auto frame){
@@ -68,7 +70,7 @@ std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::st
             auto filtered = filterHsv(preproccessed, filterArgs);
             auto points = extractNotes(filtered);
             transform(points.begin(), points.end(), back_inserter(l), [msec](auto const &p){
-                return NoteData { msec, p.x, p.y };
+                return NoteCandidate { msec, p.x, p.y };
             });
             for_each(points.begin(), points.end(), [&filtered](auto const &p){
                 filtered.template at<uchar>(p) = 0;
@@ -83,5 +85,42 @@ std::vector<NoteData> detectNotesFromVideo(std::string const &inputFile, std::st
 
     writer.release();
 
-    return vector<NoteData>(l.begin(), l.end());
+    return vector<NoteCandidate>(l.begin(), l.end());
+}
+
+std::vector<NoteData> fixNotesAtMsec(std::vector<NoteData> const &notes, double const lengthMsec)
+{
+    auto nData = notes.size();
+    auto nMsec = static_cast<int>(lengthMsec);
+    auto density = std::vector<double>(nMsec+1, 0.0);
+    auto band = 32.0;
+    auto d = band/2;
+    for (auto const &note : notes)
+    {
+        auto cur = note.timeMsec;
+        auto begin = std::max(0, static_cast<int>(cur - d));
+        auto end = std::min(nMsec, static_cast<int>(cur + d));
+        for (int t = begin; t <= end; ++t)
+        {
+            auto u = (t - cur)/band;
+            density[t] += ((abs(u) <= 1.0) ? (15.0/16.0)*(1 - u*u)*(1 - u*u) : 0.0) / nData / band;
+        }
+    }
+
+    auto notesAt = list<NoteData>();
+    for (size_t cur = 0; cur <= nMsec; ++cur)
+    {
+        auto prev = (cur == 0) ? 0.0 : density[cur-1];
+        auto next = (cur == nMsec - 1) ? 0.0 : density[cur+1];
+        auto curDens = density[cur];
+        if (prev < curDens && curDens > next) {
+            notesAt.push_back({ static_cast<double>(cur) });
+            //cout << cur << " " << 1.0 << "\n";
+        }
+        // else {
+        //    cout << cur << " " << 0.0 << "\n";
+        //}
+    }
+
+    return vector<NoteData>(notesAt.begin(), notesAt.end());
 }

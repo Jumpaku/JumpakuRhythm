@@ -12,9 +12,6 @@
 using namespace cv;
 using namespace std;
 
-
-
-
 /**
  * argv[1] : input video file
  * argv[2] : output directory
@@ -29,13 +26,19 @@ int main(int argc, char** argv)
     }
 
     auto curve = BSplineCurve::load(ifstream("data/DrstNoteCurve.txt"));
+    auto extracted = extractNotesInFrame(argv[1], argv[2]);
+    auto end = remove_if(extracted.begin(), extracted.end(), [](auto const &e){
+        return !(35 < e.y && e.y < 685);
+    });
+    auto candList = list<NoteData>();
+    transform(extracted.begin(), end, back_inserter(candList), [curve](auto const &e){
+        return NoteData { e.timeMsec - curve(e.y) };
+    });
+    auto candidates = vector<NoteData>(candList.begin(), candList.end());
+    auto fixed = fixNotesAtMsec(candidates, candidates.back().timeMsec);
 
-    auto notes = detectNotesFromVideo(argv[1], argv[2]);
-
-    auto out = ofstream(string(argv[2]) + "/note-data.tsv");
-    for_each(notes.begin(), notes.end(), [&out, curve](auto n) {
-        if (35 < n.y && n.y < 685) {
-            out << n.timeMsec - curve(n.y)<< " " << n.x << " " << n.y << "\n";
-        }
+    auto out = ofstream(string(argv[2]) + "/note-data-msec.tsv");
+    std::for_each(fixed.begin(), fixed.end(), [](auto n) {
+        out << n.timeMsec << "\n";
     });
 }
