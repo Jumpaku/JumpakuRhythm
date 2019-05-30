@@ -1,5 +1,4 @@
 #include "DetectNotes.h"
-#include "FrameProcess.h"
 
 #include <vector>
 #include <list>
@@ -11,13 +10,6 @@
 using namespace std;
 using namespace cv;
 
-struct VideoInfo
-{
-    double width;
-    double height;
-    double fps;
-    int frames;
-};
 
 VideoInfo getVideoInfo(VideoCapture const &capture)
 {
@@ -29,9 +21,56 @@ VideoInfo getVideoInfo(VideoCapture const &capture)
     };
 }
 
-void forVideoCaptureFrames(
-    VideoCapture &&capture,
-    function<void(int const index, double const msec, Mat const &frame)> const &action
+
+cv::Mat correctPosture(cv::Mat const &frame)
+{
+    Mat result;
+    flip(frame, result, 1);
+    transpose(result, result);
+    return result;
+}
+
+cv::Mat preprocess(cv::Mat const &frame, PreprocessArgs const &args)
+{
+    Mat cropped = frame(args.cropRect);
+    Mat resized;
+    resize(cropped, resized, args.resizedSize);
+    return resized;
+}
+
+cv::Mat filterHsv(cv::Mat const &frame, FilterArgs const &args)
+{
+    Mat hsv;
+    cvtColor(frame, hsv, COLOR_BGR2HSV);
+    auto l = args.hsvLow;
+    auto h = args.hsvHigh;
+    Mat filtered;
+    inRange(hsv, l, h, filtered);
+    Mat denoised = filtered;
+    Mat k = getStructuringElement(MORPH_CROSS, Size(5, 5));
+    morphologyEx(denoised, denoised, MORPH_OPEN, k);
+    morphologyEx(denoised, denoised, MORPH_DILATE, k);
+    return denoised;
+}
+
+std::list<cv::Point2d> extractNotesInFrame(cv::Mat const &binaryFrame)
+{
+    vector<vector<Point>> contours;
+    findContours(binaryFrame, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    list<Point2d> points;
+    for(auto const &cnt : contours) {
+        auto m = moments(cnt, true);
+        auto cx = m.m10/m.m00;
+        auto cy = m.m01/m.m00;
+        points.emplace_back(cx, cy);
+    }
+    return points;
+}
+
+
+void forEachVideoFrames(
+    cv::VideoCapture &&capture,
+    std::function<void(int const index, double const msec, cv::Mat const &frame)> const &action
 )
 {
     while(capture.isOpened()) {
@@ -46,11 +85,20 @@ void forVideoCaptureFrames(
     capture.release();
 }
 
-std::vector<NoteCandidate> extractNotesInFrame(std::string const &inputFile, std::string const &outputDir)
-{
-    auto capture = VideoCapture(inputFile);
-    auto vcInfo = getVideoInfo(capture);
+void transformVideoFrames(
+    cv::VideoCapture &&capture,
+    cv::VideoWriter &&writer,
+    std::function<cv::Mat(int const index, double const msec, cv::Mat const &frame)> const &transform
+) {
+    forEachVideoFrames(move(capture), [&writer, transform](auto index, auto msec, auto frame) {
+        writer << transform(index, msec, frame);
+    });
+    writer.release();
+}
 
+void extractNoteObjectsVideoFrames(cv::VideoCapture &&capture, cv::VideoWriter && writer)
+{
+    auto vcInfo = getVideoInfo(capture);
     auto crop = Rect(350, 140, vcInfo.height-700, vcInfo.width-140);
     auto preprocessArgs = PreprocessArgs {
         Rect(350, 140, vcInfo.height-700, vcInfo.width-140),
@@ -60,32 +108,30 @@ std::vector<NoteCandidate> extractNotesInFrame(std::string const &inputFile, std
         Scalar(170, 255*0.35, 255*0.8),
         Scalar(180, 255*0.65, 255)
     };
-    auto writer = VideoWriter(outputDir + "/out.mov", VideoWriter::fourcc('m', 'p', '4', 'v'), vcInfo.fps, preprocessArgs.resizedSize, false);
-
-    auto l = list<NoteCandidate>();
-    forVideoCaptureFrames(
+    transformVideoFrames(
         move(capture),
-        [&l, &writer, preprocessArgs, filterArgs, outputDir, vcInfo](auto index, auto msec, auto frame){
-            auto preproccessed = preprocess(frame, preprocessArgs);
+        move(writer),
+        [preprocessArgs, filterArgs, vcInfo](auto index, auto msec, auto frame){
+            auto corrected = correctPosture(frame);
+            auto preproccessed = preprocess(corrected, preprocessArgs);
             auto filtered = filterHsv(preproccessed, filterArgs);
-            auto points = extractNotes(filtered);
-            transform(points.begin(), points.end(), back_inserter(l), [msec](auto const &p){
-                return NoteCandidate { msec, p.x, p.y };
-            });
-            for_each(points.begin(), points.end(), [&filtered](auto const &p){
-                filtered.template at<uchar>(p) = 0;
-            });
-            /*
-            auto ss = stringstream();
-            ss << outputDir << "/frame_" << right << setfill('0') << setw(to_string(vcInfo.frames).size() + 1) << index << ".jpg";
-            imwrite(ss.str(), preproccessed);
-            */
-            writer.write(filtered);
+            return filtered;
     });
+}
 
-    writer.release();
+std::list<NoteCentroid> collectNoteCentroids(cv::VideoCapture &&capture)
+{
+    auto centroids = list<NoteCentroid>();
+    forEachVideoFrames(move(capture), [&centroids](auto index, auto msec, auto frame){
+        Mat binary;
+        inRange(frame, Scalar(127,127,127), Scalar(255,255,255), binary);
+        auto inFrame = extractNotesInFrame(binary);
+        transform(inFrame.begin(), inFrame.end(), back_inserter(centroids), [msec](auto const &p){
+            return NoteCentroid { msec, p.x, p.y };
+        });
+    });
+    return centroids;
 
-    return vector<NoteCandidate>(l.begin(), l.end());
 }
 
 std::vector<NoteData> fixNotesAtMsec(std::vector<NoteData> const &notes, double const lengthMsec)
@@ -115,11 +161,8 @@ std::vector<NoteData> fixNotesAtMsec(std::vector<NoteData> const &notes, double 
         auto curDens = density[cur];
         if (prev < curDens && curDens > next) {
             notesAt.push_back({ static_cast<double>(cur) });
-            //cout << cur << " " << 1.0 << "\n";
         }
-        // else {
-        //    cout << cur << " " << 0.0 << "\n";
-        //}
+        cout << cur << " " << curDens << "\n";
     }
 
     return vector<NoteData>(notesAt.begin(), notesAt.end());
