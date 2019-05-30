@@ -1,0 +1,8 @@
+version: '3'
+
+services: 
+  plot-data:
+    build: './'
+    container_name: 'plot-data'
+    volumes: 
+      - './:/home/plot-data/'
