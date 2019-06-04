@@ -4,11 +4,7 @@
     "service": "music-data",
     "workspaceFolder": "/home/music-data/",
     "shutdownAction": "stopCompose",
-	"extensions": [ "ms-python.python" ],
+	"extensions": [],
 	"settings": {
-        "python.pythonPath": "/usr/local/bin/python",
-        "python.linting.pylintEnabled": false,
-        "python.linting.pep8Enabled": true,
-        "python.linting.enabled": true
     }
 }

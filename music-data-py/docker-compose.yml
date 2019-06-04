@@ -1,0 +1,9 @@
+version: '3'
+
+services: 
+  music-data:
+    build: './'
+    container_name: 'music-data'
+    volumes: 
+     - './:/home/music-data/'
+     - './../asset/:/home/asset/'
