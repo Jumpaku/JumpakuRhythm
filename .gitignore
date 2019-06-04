@@ -31,8 +31,6 @@
 *.out
 *.app
 
-note-data/include/*
-note-data/build/*
 note-data/asset/*
 
 *.DS_Store
@@ -44,6 +42,11 @@ note-data/output\.txt
 note-data/tools/bin/
 note-data/tools/build/
 note-data/tools/include/
+
+
+music-data/tools/bin/
+music-data/tools/build/
+
 
 *.wav
 *.m4a
