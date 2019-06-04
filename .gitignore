@@ -31,16 +31,22 @@
 *.out
 *.app
 
-gen-data/include/*
-gen-data/build/*
-gen-data/asset/*
+note-data/include/*
+note-data/build/*
+note-data/asset/*
 
 *.DS_Store
 
 \.vscode/
 
-gen-data/output\.txt
+note-data/output\.txt
 
-gen-data/tools/bin/
-gen-data/tools/build/
-gen-data/tools/include/
+note-data/tools/bin/
+note-data/tools/build/
+note-data/tools/include/
+
+*.wav
+*.m4a
+*.mp4
+*.mp3
+*.mov

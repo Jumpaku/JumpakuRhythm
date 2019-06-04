@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     utils::logging::setLogLevel(utils::logging::LOG_LEVEL_SILENT);
 
-    {/* extracted note objects -> out.mov */
+    {/* extracted note objects -> out.mov *//*
         auto capture = VideoCapture(string(argv[1]));
         auto vcInfo = getVideoInfo(capture);
         auto writer = VideoWriter(

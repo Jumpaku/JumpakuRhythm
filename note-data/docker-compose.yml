@@ -1,7 +1,7 @@
 version: '3'
 
 services: 
-  init:
+  gen-data-init:
     container_name: 'gen-data-init'
     build: './'
     volumes: 
@@ -9,10 +9,11 @@ services:
     working_dir: '/home/gen-data/'
     command: ['./scripts/gen-data-init.sh']
 
-  build-run:
+  gen-data-build-run:
     container_name: 'gen-data-build-run'
     build: './'
     volumes: 
       - './:/home/gen-data/'
+      - './../asset/:/home/asset/'
     working_dir: '/home/gen-data/'
     command: ['./scripts/gen-data-build-run.sh']
