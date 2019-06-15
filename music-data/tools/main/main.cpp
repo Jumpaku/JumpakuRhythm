@@ -1,5 +1,6 @@
 #include <iostream>
 #include <armadillo>
+#include <wave/file.h>
 
 using namespace std;
 using namespace arma;

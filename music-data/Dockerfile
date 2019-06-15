@@ -12,5 +12,11 @@ RUN cmake . && make -j7 && make install
 WORKDIR /home/
 RUN rm armadillo/ -rf
 
+WORKDIR /home/
+RUN git clone https://github.com/audionamix/wave.git
+WORKDIR /home/wave/
+RUN cmake . && make
+
 WORKDIR /home/music-data/
+
 CMD [ "sleep", "infinity" ]

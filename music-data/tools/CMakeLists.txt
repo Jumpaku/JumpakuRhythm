@@ -11,5 +11,6 @@ find_package(Armadillo REQUIRED)
 
 include_directories(${ARMADILLO_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/music_data_lib)
+include_directories(/home/wave/src/)
 add_subdirectory(music_data_lib)
 add_subdirectory(main)
