@@ -1,8 +1,9 @@
 FROM ubuntu:18.04
 
-RUN apt-get update -y && apt-get upgrade -y && \
+RUN apt-get update -y && \
     apt-get install -y build-essential && \
-    apt-get install -y cmake git libopenblas-dev liblapack-dev libarpack2-dev
+    apt-get install -y cmake git libopenblas-dev liblapack-dev libarpack2-dev && \
+    apt-get install -y clang-format
 
 WORKDIR /home/armadillo/
 RUN git clone https://gitlab.com/conradsnicta/armadillo-code.git

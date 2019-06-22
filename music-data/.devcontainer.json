@@ -4,7 +4,14 @@
     "service": "music-data",
     "workspaceFolder": "/home/music-data/",
     "shutdownAction": "stopCompose",
-	"extensions": [],
+	"extensions": [
+        "ms-vscode.cpptools",
+        "xaver.clang-format"
+    ],
 	"settings": {
+        "editor.formatOnSave": true,
+        "C_Cpp.default.includePath": [
+            "/home/wave/src/"
+        ]
     }
 }
