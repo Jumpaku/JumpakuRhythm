@@ -4,14 +4,12 @@
     "service": "music-data",
     "workspaceFolder": "/home/music-data/",
     "shutdownAction": "stopCompose",
-	"extensions": [
+    "extensions": [
         "ms-vscode.cpptools",
-        "xaver.clang-format"
+        "xaver.clang-format",
+        "mammothb.gnuplot"
     ],
-	"settings": {
-        "editor.formatOnSave": true,
-        "C_Cpp.default.includePath": [
-            "/home/wave/src/"
-        ]
+    "settings": {
+        "editor.formatOnSave": true
     }
 }

@@ -1,55 +1,10 @@
-# Prerequisites
-*.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+.vscode/
 
-# Precompiled Headers
-*.gch
-*.pch
+*.pdf
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+prototyping/NotesData/music-data/output.txt
 
-# Fortran module files
-*.mod
-*.smod
+prototyping/NotesData/plot-data/output.txt
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-note-data/asset/*
-
-*.DS_Store
-
-\.vscode/
-
-note-data/output\.txt
-
-note-data/tools/bin/
-note-data/tools/build/
-note-data/tools/include/
-
-
-music-data/tools/bin/
-music-data/tools/build/
-
-
-*.wav
-*.m4a
-*.mp4
-*.mp3
-*.mov
+prototyping/NotesData/wave
