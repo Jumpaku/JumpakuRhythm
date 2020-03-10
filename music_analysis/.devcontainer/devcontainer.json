@@ -1,0 +1,14 @@
+{
+    "name": "music_analysis",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "music_analysis",
+    "workspaceFolder": "/home/",
+    "shutdownAction": "stopCompose",
+    "extensions": [
+        "ms-python.python"
+    ],
+    "settings": {
+        "editor.formatOnSave": true,
+        "python.pythonPath": "/usr/local/bin/python"
+    }
+}

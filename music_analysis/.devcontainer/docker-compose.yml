@@ -1,0 +1,9 @@
+version: '3'
+
+services: 
+    music_analysis:
+        build: './'
+        volumes: 
+            - './../:/home'
+            - './../spleeter_model/:/spleeter_model/'
+        command: ["sleep", "infinity"]
